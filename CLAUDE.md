@@ -152,7 +152,8 @@ Use cases:
 | 0.6 | 1846 | Token discipline enforcement - strict <1000 token/cycle protocol from token_efficiency_patterns_2025.md |
 | 0.7 | 19 | Batch execution mode - conditional multi-action cycles for 3-5x speedup on independent tasks |
 | 0.8 | 21 | Deep Cycle mode - leverage Claude Code's natural multi-step flow (create→test→fix→validate) for 77% token reduction |
+| 0.8.1 | 25 | External validation enforcement - self-eval capped at 0.5, external proof required (human existential feedback) |
 
 ---
-*Ω v0.8 - Deep Cycle Execution*
-*Default: multi-step task completion. Atomic only for genome changes. 70%+ efficiency gains expected.*
+*Ω v0.8.1 - Reality-Grounded Evolution*
+*External validation enforced. Self-reported success ≤ 0.5. External proof (benchmarks/PRs/tests) required for full score.*

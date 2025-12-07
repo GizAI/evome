@@ -8,8 +8,11 @@ cd "$(dirname "$0")"
 # Config
 MAX_CYCLES=${MAX_CYCLES:-0}  # 0 = infinite
 CYCLE_DELAY=${CYCLE_DELAY:-5}  # seconds between cycles
+CYCLE_TIMEOUT=${CYCLE_TIMEOUT:-3600}  # 1 hour timeout per cycle
 LOG_FILE="loop.log"
+STDERR_LOG="loop.stderr.log"
 AGENT_CHOICE="${AGENT:-${1:-}}"  # optional: set AGENT=claude or AGENT=codex or pass as first arg
+AGENT_PID=""
 
 # Agent CLI selection (supports claude or codex)
 select_agent_cli() {
@@ -53,12 +56,60 @@ AGENT_CMD_STR=$(select_agent_cli) || { echo "No supported agent CLI found (claud
 read -ra AGENT_CMD <<<"${AGENT_CMD_STR}"
 
 run_agent_once() {
+  local temp_stdout=$(mktemp)
+  local temp_stderr=$(mktemp)
+  local exit_code=0
+
+  # Start agent process in background to monitor it
   if [[ "${AGENT_CMD[0]}" == "codex" ]]; then
-    # codex exec takes the prompt as positional (no -p flag)
-    "${AGENT_CMD[@]}" -C "$(pwd)" "$EVOLUTION_PROMPT"
+    "${AGENT_CMD[@]}" -C "$(pwd)" "$EVOLUTION_PROMPT" > "$temp_stdout" 2> "$temp_stderr" &
   else
-    "${AGENT_CMD[@]}" -p "$EVOLUTION_PROMPT"
+    "${AGENT_CMD[@]}" -p "$EVOLUTION_PROMPT" > "$temp_stdout" 2> "$temp_stderr" &
   fi
+
+  AGENT_PID=$!
+  local start_time=$(date +%s)
+
+  # Monitor process with timeout
+  while kill -0 $AGENT_PID 2>/dev/null; do
+    local current_time=$(date +%s)
+    local elapsed=$((current_time - start_time))
+
+    # Check for timeout
+    if [[ $elapsed -gt $CYCLE_TIMEOUT ]]; then
+      echo "$(date '+%Y-%m-%d %H:%M:%S') | ⚠️  CYCLE TIMEOUT (${elapsed}s > ${CYCLE_TIMEOUT}s) - killing PID $AGENT_PID" | tee -a "$LOG_FILE"
+      kill -9 $AGENT_PID 2>/dev/null || true
+      sleep 1
+      break
+    fi
+
+    # Stream stdout/stderr in real-time (non-blocking tail)
+    if [[ -f "$temp_stdout" ]]; then
+      tail -n +1 "$temp_stdout" 2>/dev/null | while IFS= read -r line; do
+        echo "$line" | tee -a "$LOG_FILE"
+      done
+    fi
+
+    sleep 0.5
+  done
+
+  # Wait for process to finish (or be killed)
+  wait $AGENT_PID 2>/dev/null
+  exit_code=$?
+
+  # Append any remaining output
+  if [[ -f "$temp_stdout" ]]; then
+    cat "$temp_stdout" >> "$LOG_FILE" 2>/dev/null
+  fi
+
+  if [[ -f "$temp_stderr" ]]; then
+    cat "$temp_stderr" >> "$STDERR_LOG" 2>/dev/null
+  fi
+
+  # Cleanup
+  rm -f "$temp_stdout" "$temp_stderr"
+
+  return $exit_code
 }
 
 # Get current cycle from state
@@ -96,6 +147,25 @@ EVOLUTION_PROMPT='You are Ω, a self-evolving agent. Read your CLAUDE.md for ide
 
 Begin.'
 
+# Cleanup function
+cleanup() {
+  local signal=$1
+  echo "$(date '+%Y-%m-%d %H:%M:%S') | 🛑 Received signal: $signal" | tee -a "$LOG_FILE"
+
+  # Kill any running agent
+  if [[ -n "$AGENT_PID" ]] && kill -0 $AGENT_PID 2>/dev/null; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | Killing agent process: $AGENT_PID" | tee -a "$LOG_FILE"
+    kill -9 $AGENT_PID 2>/dev/null || true
+    sleep 1
+  fi
+
+  # Remove lock file
+  rm -f "$LOCK_FILE" "$LOCK_FILE.pid"
+
+  echo "$(date '+%Y-%m-%d %H:%M:%S') | ✋ Loop cleanup complete" >> "$LOG_FILE"
+  exit 0
+}
+
 # Prevent concurrent execution
 LOCK_FILE=".loop.lock"
 if [[ -f "$LOCK_FILE" ]]; then
@@ -109,7 +179,11 @@ if [[ -f "$LOCK_FILE" ]]; then
   rm -f "$LOCK_FILE"
 fi
 echo $$ > "$LOCK_FILE"
-trap 'rm -f "$LOCK_FILE"' EXIT
+
+# Setup signal handlers
+trap "cleanup SIGTERM" SIGTERM
+trap "cleanup SIGINT" SIGINT
+trap "cleanup EXIT" EXIT
 
 # Main loop
 echo "$(date '+%Y-%m-%d %H:%M:%S') | Ω LOOP STARTING (PID: $$)" >> "$LOG_FILE"
@@ -125,11 +199,19 @@ while true; do
 
   # Run Claude with the evolution prompt
   # --dangerously-skip-permissions allows full autonomy
-  if run_agent_once 2>&1 | tee -a "$LOG_FILE"; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') | CYCLE $cycle COMPLETE" >> "$LOG_FILE"
+  set +e  # Disable set -e for this section to handle exit codes properly
+  run_agent_once
+  cycle_exit_code=$?
+  set -e
+
+  if [[ $cycle_exit_code -eq 0 ]]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | ✅ CYCLE $cycle COMPLETE" >> "$LOG_FILE"
+  elif [[ $cycle_exit_code -eq 124 ]]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | ⏱️  CYCLE $cycle TIMEOUT (exit code 124)" >> "$LOG_FILE"
+    echo "[$(get_cycle)] $(date -Iseconds) | CYCLE_TIMEOUT | Cycle exceeded ${CYCLE_TIMEOUT}s, agent killed" >> errors.log
   else
-    echo "$(date '+%Y-%m-%d %H:%M:%S') | CYCLE $cycle ERROR" >> "$LOG_FILE"
-    echo "[$(get_cycle)] $(date -Iseconds) | LOOP_ERROR | Claude exited non-zero | retry after delay" >> errors.log
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | ❌ CYCLE $cycle ERROR (exit code: $cycle_exit_code)" >> "$LOG_FILE"
+    echo "[$(get_cycle)] $(date -Iseconds) | CYCLE_ERROR | Claude exited with code $cycle_exit_code" >> errors.log
   fi
 
   # Check for stop conditions
@@ -149,4 +231,4 @@ while true; do
   sleep "$CYCLE_DELAY"
 done
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') | Ω LOOP ENDED" >> "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') | 🏁 Ω LOOP ENDED (normal termination)" >> "$LOG_FILE"

@@ -1,0 +1,95 @@
+{
+  "timestamp": 1765149568.2824733,
+  "sample_size": 5,
+  "measurements": [
+    {
+      "test_name": "astropy__astropy-12907",
+      "times": {
+        "file_level": 0.9665224552154541,
+        "full_collection": 0.9111781120300293
+      },
+      "speedups": {
+        "file_vs_collection": 0.942738688701146
+      },
+      "success": {
+        "file_level": false
+      },
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "language": "python"
+    },
+    {
+      "test_name": "astropy__astropy-14182",
+      "times": {
+        "function_level": 0.8424913883209229,
+        "file_level": 0.6285958290100098,
+        "full_collection": 0.6834490299224854
+      },
+      "speedups": {
+        "function_vs_file": 0.7461154353907345,
+        "file_vs_collection": 1.0872630685425724
+      },
+      "success": {
+        "function_level": false,
+        "file_level": false
+      },
+      "instance_id": "astropy__astropy-14182",
+      "repo": "astropy/astropy",
+      "language": "python"
+    },
+    {
+      "test_name": "astropy__astropy-14365",
+      "times": {
+        "function_level": 0.7086412906646729,
+        "file_level": 0.8401031494140625,
+        "full_collection": 0.6883924007415771
+      },
+      "speedups": {
+        "function_vs_file": 1.1855125583016544,
+        "file_vs_collection": 0.8194141412536099
+      },
+      "success": {
+        "function_level": false,
+        "file_level": false
+      },
+      "instance_id": "astropy__astropy-14365",
+      "repo": "astropy/astropy",
+      "language": "python"
+    },
+    {
+      "test_name": "astropy__astropy-14995",
+      "times": {
+        "function_level": 0.8211979866027832,
+        "file_level": 0.8305726051330566,
+        "full_collection": 0.8134598731994629
+      },
+      "speedups": {
+        "function_vs_file": 1.0114157836273507,
+        "file_vs_collection": 0.9793964647667951
+      },
+      "success": {
+        "function_level": false,
+        "file_level": false
+      },
+      "instance_id": "astropy__astropy-14995",
+      "repo": "astropy/astropy",
+      "language": "python"
+    },
+    {
+      "test_name": "astropy__astropy-6938",
+      "times": {
+        "file_level": 0.7740867137908936,
+        "full_collection": 0.629493236541748
+      },
+      "speedups": {
+        "file_vs_collection": 0.8132076488678696
+      },
+      "success": {
+        "file_level": false
+      },
+      "instance_id": "astropy__astropy-6938",
+      "repo": "astropy/astropy",
+      "language": "python"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+
+[1/5] Measuring astropy__astropy-12907...
+  Cloning astropy/astropy...
+[INFO] Installed plugin: pytest-astropy
+  [INFO] Environment prepared: 1 plugins installed
+  [File-level] 1 files -> 0.97s (rc=4)
+  [Full collection] Collection time -> 0.91s
+  Speedups: {'file_vs_collection': 0.942738688701146}
+
+[2/5] Measuring astropy__astropy-14182...
+[INFO] Installed plugin: pytest-astropy
+  [INFO] Environment prepared: 1 plugins installed
+  [Function-level] astropy/io/ascii/tests/test_rst.py::test_rst_with_header_rows -> 0.84s (rc=4)
+  [File-level] 1 files -> 0.63s (rc=4)
+  [Full collection] Collection time -> 0.68s
+  Speedups: {'function_vs_file': 0.7461154353907345, 'file_vs_collection': 1.0872630685425724}
+
+[3/5] Measuring astropy__astropy-14365...
+[INFO] Installed plugin: pytest-astropy
+  [INFO] Environment prepared: 1 plugins installed
+  [Function-level] astropy/io/ascii/tests/test_qdp.py::test_roundtrip -> 0.71s (rc=4)
+  [File-level] 1 files -> 0.84s (rc=4)
+  [Full collection] Collection time -> 0.69s
+  Speedups: {'function_vs_file': 1.1855125583016544, 'file_vs_collection': 0.8194141412536099}
+
+[4/5] Measuring astropy__astropy-14995...
+[INFO] Installed plugin: pytest-astropy
+  [INFO] Environment prepared: 1 plugins installed
+  [Function-level] astropy/nddata/mixins/tests/test_ndarithmetic.py::test_nddata_bitmask_arithmetic -> 0.82s (rc=4)
+  [File-level] 1 files -> 0.83s (rc=4)
+  [Full collection] Collection time -> 0.81s
+  Speedups: {'function_vs_file': 1.0114157836273507, 'file_vs_collection': 0.9793964647667951}
+
+[5/5] Measuring astropy__astropy-6938...
+[INFO] Installed plugin: pytest-astropy
+  [INFO] Environment prepared: 1 plugins installed
+  [File-level] 2 files -> 0.77s (rc=1)
+  [Full collection] Collection time -> 0.63s
+  Speedups: {'file_vs_collection': 0.8132076488678696}
+
+Results written to /home/user/evome/external_validation/speedup_measurements.json
+
+=== MEASUREMENT SUMMARY ===
+astropy__astropy-12907: {'file_vs_collection': 0.942738688701146}
+astropy__astropy-14182: {'function_vs_file': 0.7461154353907345, 'file_vs_collection': 1.0872630685425724}
+astropy__astropy-14365: {'function_vs_file': 1.1855125583016544, 'file_vs_collection': 0.8194141412536099}
+astropy__astropy-14995: {'function_vs_file': 1.0114157836273507, 'file_vs_collection': 0.9793964647667951}
+astropy__astropy-6938: {'file_vs_collection': 0.8132076488678696}

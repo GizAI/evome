@@ -1,0 +1,24 @@
+STDERR: ERROR: Missing required plugins: pytest-bdd, pytest-benchmark, pytest-instafail, pytest-mock, pytest-qt, pytest-rerunfailures
+
+
+STDOUT: 
+Attempting: instance_qutebrowser__qutebrowser-f91ace96223cac8161c16dd061907e138fe85111-v059c6fdc75567943479b23ebca7c07b5e9a7f34c
+Repo: qutebrowser/qutebrowser
+Problem preview: # Qt warning filtering tests moved to appropriate module
+
+## Description
+
+The `hide_qt_warning` function and its associated tests have been moved from `log.py` to `qtlog.py` to better organize Qt-spec...
+
+[1/4] Cloning qutebrowser/qutebrowser @ ebfe9b7a...
+✓ Clone successful
+Installing test dependencies...
+✓ Dependencies ready
+
+[2/4] Applying gold patch...
+✓ Patch applied
+
+[3/4] Running tests...
+✗ Tests failed
+
+RESULT: FAIL

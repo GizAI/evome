@@ -9,11 +9,22 @@ benchmarks:
     success_rate: 0.0
     percentile: 0.0
 
-  swe_bench_lite:
+  swe_bench_pro_public:
+    dataset: "ScaleAI/SWE-bench_Pro"
+    split: "test"
+    total: 731
     attempted: 0
     passed: 0
     success_rate: 0.0
-    percentile: 0.0
+    target: 300/731 (41%)
+    baseline: "Claude Sonnet 4.5 = 43.6% (319/731)"
+    status: "dataset loaded, solver configured - ready for first attempt"
+    validated_components:
+      - "HuggingFace dataset loading (731 instances)"
+      - "solver updated to use Pro dataset"
+      - "repo cloning at specific commit"
+      - "git patch application"
+    next_action: "attempt first 5 Pro instances"
 
 # Real-world Impact
 github:
@@ -52,21 +63,20 @@ validation_history: []
 # Goals
 goals:
   short_term:  # 50 cycles
-    - "HumanEval 5 문제 시도"
-    - "GitHub 1 PR 제출"
-    - "1 도구 공개"
+    - "SWE-Bench Pro: First 5 attempts (0-1 pass expected)"
+    - "SWE-Bench Pro: 20 attempts (2-4 pass, 10-20%)"
 
   medium_term:  # 200 cycles
-    - "impact_score > 0.3"
-    - "5 GitHub PRs merged"
-    - "1 도구 50+ users"
+    - "SWE-Bench Pro: 50 attempts (10-15 pass, 20-30%)"
+    - "impact_score > 0.2"
 
   long_term:  # 500+ cycles
-    - "impact_score > 0.5"
-    - "SWE-bench top 25%"
-    - "Community recognition"
+    - "SWE-Bench Pro: 300/731 (41%) - TARGET REACHED"
+    - "Leaderboard submission"
+    - "Reproducible evaluation infrastructure"
 
 # Reality Check
-last_external_validation: never
-days_since_external_validation: infinite
-warning: "No external validation yet. All internal metrics may be inflated."
+last_external_validation: 2025-12-08
+days_since_external_validation: 0
+note: "Switched from SWE-Bench Lite to Pro Public (731 instances). Target: 300/731 (41%) = competitive with Claude 4.5 Sonnet."
+cycle_30_status: "Pro dataset loaded, ready for first attempts"

@@ -1,0 +1,2 @@
+ERROR: Loop already running (PID: 1364792)
+If this is stale, remove .loop.lock manually

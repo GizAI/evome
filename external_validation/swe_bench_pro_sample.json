@@ -1,0 +1,23 @@
+{
+  "dataset": "ScaleAI/SWE-bench_Pro",
+  "split": "test",
+  "total_instances": 731,
+  "loaded": "2025-12-08T07:09:00Z",
+  "sample_fields": [
+    "repo",
+    "instance_id",
+    "base_commit",
+    "patch",
+    "test_patch",
+    "problem_statement",
+    "requirements",
+    "interface",
+    "repo_language",
+    "fail_to_pass",
+    "pass_to_pass",
+    "issue_specificity",
+    "issue_categories",
+    "before_repo_set_cmd",
+    "selected_test_files_to_run"
+  ]
+}
