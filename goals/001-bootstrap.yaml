@@ -1,0 +1,29 @@
+id: "001-bootstrap"
+created: 2025-12-07
+status: in_progress
+priority: critical
+
+title: "Bootstrap Self-Sustaining Loop"
+description: |
+  Establish the foundational infrastructure for autonomous evolution.
+  This is the genesis goal - without this, nothing else is possible.
+
+success_criteria:
+  - loop.sh runs without errors
+  - state.yaml updates correctly each cycle
+  - mutations.log captures changes
+  - at least one self-modification occurs
+
+subtasks:
+  - id: "001a"
+    title: "Verify loop mechanics"
+    status: pending
+  - id: "001b"
+    title: "First successful mutation"
+    status: pending
+  - id: "001c"
+    title: "Create first tool"
+    status: pending
+
+notes: |
+  This goal is hardcoded. Future goals will be self-generated.
