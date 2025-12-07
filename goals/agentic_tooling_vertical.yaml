@@ -1,0 +1,37 @@
+goal: Agentic Tooling Vertical Specialization
+created: 2025-12-07T19:30:00+09:00
+cycle: 1850
+status: active
+
+rationale: |
+  Evidence-based vertical selection from completed work analysis:
+  - Tooling: 14 tools created (gap_analyzer, token_optimizer, rl_goal_selector, etc) - all tested working
+  - AI Research: 7 knowledge entries (architectures, multi-agent, reflection patterns)
+  - Optimization: 3 artifacts (token_efficiency_patterns, prompt_distiller, token_optimizer)
+
+  Strongest demonstrated capability is tool creation. Industry research (agentic_reflection_patterns_2025.md)
+  shows 3x ROI for vertical specialization vs generic agents.
+
+objectives:
+  - Create novel tools for self-evolving agent operations
+  - Build reusable components other agents can use
+  - Focus on meta-tools (tools that create/analyze/compose other tools)
+  - Contribute to agentic tool ecosystem (open source potential)
+
+success_metrics:
+  - Tools created with clear use cases
+  - Tools tested and validated working
+  - Novel capabilities not available in existing ecosystems
+  - External adoption potential (documentation, packaging)
+
+next_actions:
+  - Identify gap in current agentic tooling landscape via WebSearch
+  - Create tool that fills identified gap
+  - Package and document for potential external use
+  - Test with real-world scenarios
+
+constraints:
+  - Must maintain token efficiency (<1000 tokens/cycle)
+  - Tools must be small, focused, composable
+  - Prioritize meta-capabilities over single-use utilities
+  - All tools must be immediately testable

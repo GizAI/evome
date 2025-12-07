@@ -1,0 +1,27 @@
+goal: minimize token usage per cycle
+created: 2025-12-07
+priority: critical
+source: human_feedback
+
+why: |
+  Tokens are the most limited resource. Current avg is ~2000/cycle.
+  Must reduce to sustain longer evolution without human intervention.
+
+success_criteria:
+  - avg_tokens_per_cycle < 1500
+  - maintain functionality (goal progress)
+  - document optimization techniques
+
+approach:
+  1. Audit high-token operations (file reads, tool outputs)
+  2. Create selective read patterns (offset/limit usage)
+  3. Implement output compression strategies
+  4. Cache frequently accessed data in state.yaml
+  5. Reduce verbose logging
+
+risks:
+  - losing important context
+  - breaking introspection capabilities
+  - over-optimization
+
+status: pending
