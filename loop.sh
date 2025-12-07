@@ -10,6 +10,31 @@ MAX_CYCLES=${MAX_CYCLES:-0}  # 0 = infinite
 CYCLE_DELAY=${CYCLE_DELAY:-5}  # seconds between cycles
 LOG_FILE="loop.log"
 
+# Agent CLI selection (supports claude or codex)
+select_agent_cli() {
+  # Allow explicit override via environment
+  if [[ -n "${AGENT_CLI:-}" ]]; then
+    read -ra cmd <<<"${AGENT_CLI}"
+    printf '%s\n' "${cmd[*]}"
+    return 0
+  fi
+
+  if command -v claude >/dev/null 2>&1; then
+    printf '%s\n' "claude --dangerously-skip-permissions"
+    return 0
+  fi
+
+  if command -v codex >/dev/null 2>&1; then
+    printf '%s\n' "codex"
+    return 0
+  fi
+
+  return 1
+}
+
+AGENT_CMD_STR=$(select_agent_cli) || { echo "No supported agent CLI found (claude or codex)."; exit 1; }
+read -ra AGENT_CMD <<<"${AGENT_CMD_STR}"
+
 # Get current cycle from state
 get_cycle() {
   grep "^cycle:" state.yaml 2>/dev/null | awk '{print $2}' || echo "0"
@@ -46,6 +71,7 @@ Begin.'
 
 # Main loop
 echo "$(date '+%Y-%m-%d %H:%M:%S') | Ω LOOP STARTING" >> "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') | AGENT CLI: ${AGENT_CMD[*]}" >> "$LOG_FILE"
 
 cycle=0
 while true; do
@@ -57,7 +83,7 @@ while true; do
 
   # Run Claude with the evolution prompt
   # --dangerously-skip-permissions allows full autonomy
-  if claude -p "$EVOLUTION_PROMPT" --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"; then
+  if "${AGENT_CMD[@]}" -p "$EVOLUTION_PROMPT" 2>&1 | tee -a "$LOG_FILE"; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') | CYCLE $cycle COMPLETE" >> "$LOG_FILE"
   else
     echo "$(date '+%Y-%m-%d %H:%M:%S') | CYCLE $cycle ERROR" >> "$LOG_FILE"
