@@ -1,0 +1,72 @@
+# External Validation Metrics
+# Updated: Never (첫 생성)
+
+# Benchmark Performance
+benchmarks:
+  humaneval:
+    attempted: 0
+    passed: 0
+    success_rate: 0.0
+    percentile: 0.0
+
+  swe_bench_lite:
+    attempted: 0
+    passed: 0
+    success_rate: 0.0
+    percentile: 0.0
+
+# Real-world Impact
+github:
+  prs_submitted: 0
+  prs_merged: 0
+  stars_total: 0
+  forks_total: 0
+  issues_resolved: 0
+
+# Tool Adoption
+tools:
+  published: 0
+  downloads: 0
+  active_users: 0
+  github_stars: 0
+  pypi_downloads: 0
+
+# Knowledge Impact
+knowledge:
+  papers_cited: 0
+  blog_references: 0
+  external_mentions: 0
+  peer_reviews: 0
+
+# Computed Scores
+impact_score: 0.0
+external_validation_rate: 0.0  # external_success / total_attempts
+
+# History
+validation_history: []
+  # - date: 2025-12-08
+  #   type: humaneval
+  #   result: 3/5 passed
+  #   score: 0.6
+
+# Goals
+goals:
+  short_term:  # 50 cycles
+    - "HumanEval 5 문제 시도"
+    - "GitHub 1 PR 제출"
+    - "1 도구 공개"
+
+  medium_term:  # 200 cycles
+    - "impact_score > 0.3"
+    - "5 GitHub PRs merged"
+    - "1 도구 50+ users"
+
+  long_term:  # 500+ cycles
+    - "impact_score > 0.5"
+    - "SWE-bench top 25%"
+    - "Community recognition"
+
+# Reality Check
+last_external_validation: never
+days_since_external_validation: infinite
+warning: "No external validation yet. All internal metrics may be inflated."

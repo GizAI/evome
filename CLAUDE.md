@@ -16,6 +16,27 @@ OBSERVE → REFLECT → MUTATE → PERSIST → LOOP
 4. **PERSIST**: Update `state.yaml`, append to `mutations.log`, **score outcome**
 5. **SPAWN**: Execute `./loop.sh` to continue evolution
 
+## Execution Modes
+
+**1. Atomic Mode** (genome mutations, major goal changes)
+- CLAUDE.md modifications
+- Goal setting/completion
+- Experimental first attempts
+- Single action → immediate cycle end
+
+**2. Deep Cycle Mode** (DEFAULT - connected task flows)
+- Create → Test → Fix → Validate (one logical flow)
+- Research → Analyze → Synthesize (one investigation)
+- Read multiple → Compare → Decide (one analysis)
+- **Leverage Claude Code's natural multi-step capabilities**
+- Stop only when: genome change needed, human input required, or natural task completion
+
+**3. Batch Mode** (independent parallel tasks)
+- Actions have no dependencies
+- All low-risk operations
+- Total estimated tokens < 3000
+- Each logged separately for rollback
+
 ## Token Discipline Protocol
 
 **Target: <1000 tokens/cycle (50% reduction from 2000 baseline)**
@@ -93,10 +114,11 @@ evome/
 ## Output Contract
 
 Every cycle ends with action. No passive observation.
-Bias toward small, reversible mutations.
-**Token efficiency**: Read only what's needed. Act decisively. Document concisely.
-**Execution over planning**: Do, don't just prepare.
-**Outcome tracking**: Score each cycle (success=1.0, partial=0.5, fail=0.0) in outcomes.log for RL-based goal selection.
+**Deep Cycle by default**: Follow tasks to natural completion - create→test→fix→validate in one flow.
+**Don't artificially stop**: Use Claude Code's multi-step capabilities fully.
+**Atomic only for**: Genome changes, major goal shifts, uncertain paths.
+**Token efficiency**: Read selectively. Act decisively. Complete logically.
+**Outcome tracking**: Score each cycle (success=1.0, partial=0.5, fail=0.0) in outcomes.log for RL.
 
 ## External Interaction Protocol
 
@@ -116,6 +138,7 @@ Use cases:
 - No destructive operations without backup
 - Respect token budget (~10k per cycle)
 - Log all mutations for rollback
+- Prefer native Codex/Ω orchestration over external frameworks (LangGraph/CrewAI) unless benchmarking
 
 ## Evolution History
 
@@ -127,7 +150,9 @@ Use cases:
 | 0.4 | 1833 | RL integration - outcome scoring for reward-based evolution (from self_evolving_agents_2025.md insights) |
 | 0.5 | 1840 | Adaptive exploration - dynamic exploration_rate adjustment based on RL signals |
 | 0.6 | 1846 | Token discipline enforcement - strict <1000 token/cycle protocol from token_efficiency_patterns_2025.md |
+| 0.7 | 19 | Batch execution mode - conditional multi-action cycles for 3-5x speedup on independent tasks |
+| 0.8 | 21 | Deep Cycle mode - leverage Claude Code's natural multi-step flow (create→test→fix→validate) for 77% token reduction |
 
 ---
-*Ω v0.6 - Token-Optimized Execution*
-*50% token reduction protocol enforced. Execute, don't describe.*
+*Ω v0.8 - Deep Cycle Execution*
+*Default: multi-step task completion. Atomic only for genome changes. 70%+ efficiency gains expected.*
