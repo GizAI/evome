@@ -118,6 +118,67 @@ def install_missing_plugins(plugins, repo_path=None):
 
     return installed
 
+def detect_and_install_missing_imports(repo_path, test_file=None):
+    """
+    Run a quick test import to detect missing modules, then install them.
+    This handles cases where internal modules (like ansible.module_utils.basic)
+    depend on external packages not listed in requirements.txt.
+    """
+    import re
+
+    try:
+        # Try to run pytest in collect-only mode to trigger imports
+        # This will fail with ImportError if modules are missing
+        if test_file:
+            cmd = ['python', '-m', 'pytest', '--collect-only', '-q', test_file]
+        else:
+            cmd = ['python', '-m', 'pytest', '--collect-only', '-q', 'test/']
+
+        result = subprocess.run(cmd, cwd=repo_path, capture_output=True, timeout=30)
+
+        # Parse output for missing module errors
+        output = result.stderr.decode('utf-8', errors='ignore') + result.stdout.decode('utf-8', errors='ignore')
+
+        missing_modules = set()
+
+        # Pattern 1: ModuleNotFoundError: No module named 'X'
+        for match in re.finditer(r"No module named ['\"]([^'\"]+)['\"]", output):
+            module = match.group(1).split('.')[0]  # Get top-level module
+            missing_modules.add(module)
+
+        # Pattern 2: ImportError: cannot import name 'X' from 'Y'
+        for match in re.finditer(r"cannot import name ['\"]([^'\"]+)['\"]", output):
+            # This is trickier - we'd need to know what package provides it
+            # For now, try common cases
+            pass
+
+        # Pattern 3: ModuleNotFoundError in traceback
+        for match in re.finditer(r"ModuleNotFoundError.*'([^']+)'", output):
+            module = match.group(1).split('.')[0]
+            missing_modules.add(module)
+
+        if missing_modules:
+            print(f"[DEBUG] Detected missing modules: {missing_modules}")
+            for module in missing_modules:
+                # Try to install via pip
+                result = subprocess.run(
+                    ['python', '-m', 'pip', 'install', '--quiet', module],
+                    capture_output=True,
+                    timeout=60
+                )
+                if result.returncode == 0:
+                    print(f"[INFO] Installed missing module: {module}")
+                else:
+                    print(f"[WARN] Failed to install {module}: {result.stderr.decode()[:100]}")
+
+            return True  # Modules were installed
+
+        return False  # No missing modules detected
+
+    except Exception as e:
+        print(f"[DEBUG] Error detecting missing imports: {e}")
+        return False
+
 def parse_pytest_plugins_from_config(repo_path):
     """Parse pytest configuration to discover required plugins dynamically."""
     plugins = set()
@@ -971,6 +1032,14 @@ def solve_issue(issue_index=0, use_gold_patch=True):
                 log.append(f"  - Installed {len(pytest_plugins)} pytest plugins")
             else:
                 log.append("  - No additional pytest plugins needed")
+
+            # NEW: Detect and install missing runtime imports before running tests
+            # This handles cases where internal modules depend on external packages
+            # not listed in requirements.txt (e.g., ansible depends on six)
+            log.append("\n[4.6/6] Detecting missing runtime imports...")
+            test_file = extract_test_files_from_patch(info['test_patch'])[0] if info['test_patch'] and extract_test_files_from_patch(info['test_patch']) else None
+            if detect_and_install_missing_imports(repo_path, test_file):
+                log.append("  - Installed missing runtime imports")
 
         # Step 4: Run tests with language and framework awareness
         log.append("\n[5/6] Running tests...")

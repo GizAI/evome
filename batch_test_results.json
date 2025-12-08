@@ -1,0 +1,188 @@
+{
+  "timestamp": "2025-12-08T08:40:05.161118",
+  "total_instances": 25,
+  "passed": 5,
+  "failed": 20,
+  "pass_rate": 20.0,
+  "failure_breakdown": {
+    "TEST_FAILURE": 11,
+    "UNKNOWN": 9
+  },
+  "results": [
+    {
+      "instance_id": 0,
+      "repo": "NodeBB/NodeBB",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: (node:1432644) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.\n(Use `node"
+    },
+    {
+      "instance_id": 1,
+      "repo": "qutebrowser/qutebrowser",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "[INFO] Installed plugin: pytest-rerunfailures\n[INFO] Installed plugin: pytest-qt\n[INFO] Installed plugin: pytest-instafail\n[INFO] Installed plugin: pytest-benchmark\n[INFO] Installed plugin: pytest-moc"
+    },
+    {
+      "instance_id": 2,
+      "repo": "NodeBB/NodeBB",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: (node:1433725) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.\n(Use `node"
+    },
+    {
+      "instance_id": 3,
+      "repo": "qutebrowser/qutebrowser",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "[INFO] Installed plugin: pytest-rerunfailures\n[INFO] Installed plugin: pytest-timeout\n[INFO] Installed plugin: pytest-cov\n[INFO] Installed plugin: pytest-bdd\n[INFO] Installed plugin: pytest-benchmark\n"
+    },
+    {
+      "instance_id": 4,
+      "repo": "ansible/ansible",
+      "status": "PASS",
+      "failure_type": "N/A",
+      "output": "[INFO] Installed plugin: pytest-qt\n[INFO] Installed plugin: pytest-instafail\n[INFO] Installed plugin: pytest-cov\n[INFO] Installed plugin: pytest-benchmark\n[INFO] Installed plugin: pytest-timeout\n[INFO"
+    },
+    {
+      "instance_id": 10,
+      "repo": "internetarchive/openlibrary",
+      "status": "PASS",
+      "failure_type": "N/A",
+      "output": "Attempting: instance_internetarchive__openlibrary-dbbd9d539c6d4fd45d5be9662aa19b6d664b5137-v08d8e8889ec945ab821fb156c04c7d2e2810debb\nRepo: internetarchive/openlibrary\nProblem preview: # \u2018/lists/add\u2019 r"
+    },
+    {
+      "instance_id": 11,
+      "repo": "ansible/ansible",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "[INFO] Installed plugin: pytest-benchmark\n[INFO] Installed plugin: pytest-timeout\n[INFO] Installed plugin: pytest-instafail\n[INFO] Installed plugin: pytest-bdd\n[INFO] Installed plugin: pytest-mock\n[IN"
+    },
+    {
+      "instance_id": 12,
+      "repo": "gravitational/teleport",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_gravitational__teleport-c782838c3a174fdff80cafd8cd3b1aa4dae8beb2\nRepo: gravitational/teleport\nProblem preview: \"# `ClusterConfig` caching issues with Pre-v7 Remote Clusters. \\n\\n#"
+    },
+    {
+      "instance_id": 13,
+      "repo": "qutebrowser/qutebrowser",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "[INFO] Installed plugin: pytest-timeout\n[INFO] Installed plugin: pytest-benchmark\n[INFO] Installed plugin: pytest-mock\n[INFO] Installed plugin: pytest-qt\n[INFO] Installed plugin: pytest-rerunfailures\n"
+    },
+    {
+      "instance_id": 14,
+      "repo": "element-hq/element-web",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: Browserslist: caniuse-lite is outdated. Please run:\nnpx browserslist@latest --update-db\n\nWhy you should do it regularly:\nhttps://github.com/browserslist/browserslist#browsers-data-updating\nBro"
+    },
+    {
+      "instance_id": 20,
+      "repo": "gravitational/teleport",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_gravitational__teleport-e6d86299a855687b21970504fbf06f52a8f80c74-vce94f93ad1030e3136852817f2423c1b3ac37bc4\nRepo: gravitational/teleport\nProblem preview: ## Title: Update user trai"
+    },
+    {
+      "instance_id": 21,
+      "repo": "internetarchive/openlibrary",
+      "status": "PASS",
+      "failure_type": "N/A",
+      "output": "Attempting: instance_internetarchive__openlibrary-8a5a63af6e0be406aa6c8c9b6d5f28b2f1b6af5a-v0f5aece3601a5b4419f7ccec1dbda2071be28ee4\nRepo: internetarchive/openlibrary\nProblem preview: # Host-scoped sc"
+    },
+    {
+      "instance_id": 22,
+      "repo": "navidrome/navidrome",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_navidrome__navidrome-b65e76293a917ee2dfc5d4b373b1c62e054d0dca\nRepo: navidrome/navidrome\nProblem preview: # Selective event delivery for user and client\n\n## Description\nEvents gene"
+    },
+    {
+      "instance_id": 23,
+      "repo": "internetarchive/openlibrary",
+      "status": "PASS",
+      "failure_type": "N/A",
+      "output": "Attempting: instance_internetarchive__openlibrary-25858f9f0c165df25742acf8309ce909773f0cdd-v13642507b4fc1f8d234172bf8129942da2c2ca26\nRepo: internetarchive/openlibrary\nProblem preview: \"# Enhancement: "
+    },
+    {
+      "instance_id": 24,
+      "repo": "element-hq/element-web",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: (node:1443241) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.\n(Use `node"
+    },
+    {
+      "instance_id": 30,
+      "repo": "gravitational/teleport",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_gravitational__teleport-eefac60a350930e5f295f94a2d55b94c1988c04e-vee9b09fb20c43af7e520f57e9239bbcf46b7113d\nRepo: gravitational/teleport\nProblem preview: ## Title: Lack of utility "
+    },
+    {
+      "instance_id": 31,
+      "repo": "NodeBB/NodeBB",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: (node:1444211) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.\n(Use `node"
+    },
+    {
+      "instance_id": 32,
+      "repo": "navidrome/navidrome",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_navidrome__navidrome-8e640bb8580affb7e0ea6225c0bbe240186b6b08\nRepo: navidrome/navidrome\nProblem preview: # Title: Implement new Artist refresh\n\n## Type of Issue\nFeature / Refactor"
+    },
+    {
+      "instance_id": 33,
+      "repo": "future-architect/vuls",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_future-architect__vuls-2c84be80b65d022c262956cd26fc79d8bb2f7010\nRepo: future-architect/vuls\nProblem preview: # Scanner fails on non-standard source RPM filenames and epoch handlin"
+    },
+    {
+      "instance_id": 34,
+      "repo": "flipt-io/flipt",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_flipt-io__flipt-c12967bc73fdf02054cf3ef8498c05e25f0a18c0\nRepo: flipt-io/flipt\nProblem preview: \"# Title\\n\\nContext cancellation and deadline exceeded errors are incorrectly classi"
+    },
+    {
+      "instance_id": 50,
+      "repo": "future-architect/vuls",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_future-architect__vuls-5af1a227339e46c7abf3f2815e4c636a0c01098e\nRepo: future-architect/vuls\nProblem preview: # Issue Title: Incorrect detection of running kernel package versions "
+    },
+    {
+      "instance_id": 51,
+      "repo": "element-hq/element-web",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "STDERR: (node:1445025) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.\n(Use `node"
+    },
+    {
+      "instance_id": 52,
+      "repo": "ansible/ansible",
+      "status": "FAIL",
+      "failure_type": "TEST_FAILURE",
+      "output": "[INFO] Installed plugin: pytest-timeout\n[INFO] Installed plugin: pytest-bdd\n[INFO] Installed plugin: pytest-qt\n[INFO] Installed plugin: pytest-cov\n[INFO] Installed plugin: pytest-instafail\n[INFO] Inst"
+    },
+    {
+      "instance_id": 53,
+      "repo": "protonmail/webclients",
+      "status": "FAIL",
+      "failure_type": "UNKNOWN",
+      "output": "Attempting: instance_protonmail__webclients-08bb09914d0d37b0cd6376d4cab5b77728a43e7b\nRepo: protonmail/webclients\nProblem preview: # Feature Request: Add customizable TOTP input component for authentic"
+    },
+    {
+      "instance_id": 54,
+      "repo": "ansible/ansible",
+      "status": "PASS",
+      "failure_type": "N/A",
+      "output": "[INFO] Installed plugin: pytest-timeout\n[INFO] Installed plugin: pytest-benchmark\n[INFO] Installed plugin: pytest-bdd\n[INFO] Installed plugin: pytest-cov\n[INFO] Installed plugin: pytest-rerunfailures\n"
+    }
+  ]
+}
