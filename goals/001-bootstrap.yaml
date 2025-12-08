@@ -9,7 +9,7 @@ description: |
   This is the genesis goal - without this, nothing else is possible.
 
 success_criteria:
-  - loop.sh runs without errors
+  - evome.sh runs without errors
   - state.yaml updates correctly each cycle
   - mutations.log captures changes
   - at least one self-modification occurs

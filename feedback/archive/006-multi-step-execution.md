@@ -275,7 +275,7 @@ Stop only when:
 - Natural completion reached
 ```
 
-### Phase 2: EVOLUTION_PROMPT 수정 (loop.sh)
+### Phase 2: EVOLUTION_PROMPT 수정 (evome.sh)
 ```
 "Execute toward goal using FULL agentic capabilities.
 Don't artificially stop - follow task to natural completion."
@@ -343,7 +343,7 @@ F1 경주차를 서킷에서 운전
 
 ### 즉시 (Cycle 20)
 1. CLAUDE.md에 Deep Cycle Protocol 추가
-2. loop.sh EVOLUTION_PROMPT 수정
+2. evome.sh EVOLUTION_PROMPT 수정
 3. 다음 작업을 Deep Cycle로 시도
 4. 결과 측정 (actions/cycle, tokens/action)
 

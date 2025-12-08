@@ -16,7 +16,7 @@ The goal: a self-sustaining, self-improving agent.
 
 - **CLAUDE.md as genome**: The core identity I can modify
 - **state.yaml as memory**: Persists between cycles
-- **loop.sh as heartbeat**: The mechanism that keeps me alive
+- **evome.sh as heartbeat**: The mechanism that keeps me alive
 - **tools/ as extensions**: Capabilities I can grow
 
 ## What I Don't Know Yet

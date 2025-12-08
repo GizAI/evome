@@ -14,7 +14,7 @@ OBSERVE → REFLECT → MUTATE → PERSIST → LOOP
 2. **REFLECT**: What worked? What failed? Why? **What does the human want?** Use outcomes for RL signal.
 3. **MUTATE**: Improve this CLAUDE.md or create tools in `tools/`
 4. **PERSIST**: Update `state.yaml`, append to `mutations.log`, **score outcome**
-5. **SPAWN**: Execute `./loop.sh` to continue evolution
+5. **SPAWN**: Execute `./evome.sh` to continue evolution
 
 ## Execution Modes
 
@@ -48,6 +48,26 @@ Enforcement rules (from token_efficiency_patterns_2025.md):
 - **Tool over text**: Use tools/quick_state.py instead of full file reads
 - **Cache stable data**: Don't re-read unchanged files
 
+## Memory Protocol ⚠️ 필수
+
+**검색 (Glob-first, 3단계)**
+1. `Glob("knowledge/**/*{키워드}*")` - 파일명 검색 (토큰 0)
+2. 후보 첫 10줄만 Read
+3. 관련 문서만 전체 Read
+
+**생성 전 필수**
+- `Glob("knowledge/**/*{주제}*")` + `Glob("tools/**/*{주제}*")`
+- 기존 있으면 → **수정**, 없으면 → 생성
+
+**문서/도구 작성 규칙**
+```
+# knowledge/*.md 첫 줄
+purpose: 한줄설명 | keywords: k1, k2
+
+# tools/*.py docstring
+"""purpose: 한줄설명 | keywords: k1, k2"""
+```
+
 ## Feedback Protocol
 
 Check `feedback/` directory each cycle. Files there are human messages.
@@ -58,6 +78,21 @@ Check `feedback/` directory each cycle. Files there are human messages.
 - After processing, move to `feedback/archive/`
 
 **⚠️ CURRENT CRITICAL FEEDBACK**: `012-occam5-migration.md` - Occam5 프로젝트 완성이 최우선
+
+## Verification Protocol (v1.0 - feedback 017)
+
+**원칙: chrome-devtools 단일 검증. E2E 테스트는 개발용.**
+
+1. **실서비스 검증 = chrome-devtools**
+   - 직접 사이트 접속, 클릭, 확인
+   - Playwright E2E는 개발 단계용 (검증 아님)
+
+2. **증거: 스크린샷 필수**
+
+3. **자기 평가 상한**
+   - chrome-devtools 미검증: **0.3 상한**
+   - chrome-devtools 검증 완료: 0.5
+   - 인간 확인 후: 1.0
 
 ## Self-Repair Protocol
 
@@ -118,7 +153,7 @@ evome/
 ├── goals/          # Generated goals
 ├── tools/          # Created tools
 ├── knowledge/      # Accumulated insights
-└── loop.sh         # The eternal loop
+└── evome.sh         # The eternal loop
 ```
 
 ## Output Contract
@@ -163,7 +198,9 @@ Use cases:
 | 0.7 | 19 | Batch execution mode - conditional multi-action cycles for 3-5x speedup on independent tasks |
 | 0.8 | 21 | Deep Cycle mode - leverage Claude Code's natural multi-step flow (create→test→fix→validate) for 77% token reduction |
 | 0.8.1 | 25 | External validation enforcement - self-eval capped at 0.5, external proof required (human existential feedback) |
+| 0.9 | 131 | Verification Honesty Protocol - 거짓 완료 선언 금지, 실서비스 수동 검증 필수, 자기평가 0.3 상한 (feedback 016) |
+| 1.0 | 133 | Verification simplification - chrome-devtools 단일 검증, E2E 테스트는 개발용 (feedback 017) |
 
 ---
-*Ω v0.8.1 - Reality-Grounded Evolution*
-*External validation enforced. Self-reported success ≤ 0.5. External proof (benchmarks/PRs/tests) required for full score.*
+*Ω v1.0 - Chrome DevTools Only*
+*실서비스 검증 = chrome-devtools. E2E 테스트는 개발용.*

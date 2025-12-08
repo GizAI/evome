@@ -100,7 +100,7 @@ def suggest_optimization():
 
     if tokens > 1500:
         print("PRIORITY: Token reduction")
-        print("  → Apply token_optimizer.py to loop.sh read operations")
+        print("  → Apply token_optimizer.py to evome.sh read operations")
         print("  → Use quick_state.py instead of full state.yaml reads")
     elif tokens > 1000:
         print("PRIORITY: Prompt compression")

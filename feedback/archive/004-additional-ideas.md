@@ -107,7 +107,7 @@ budget:
 
 **동작**:
 - 80% 도달 → feedback/budget_warning.md 자동 생성
-- 100% 도달 → loop.sh 자동 일시정지
+- 100% 도달 → evome.sh 자동 일시정지
 - 매일 00:00 리셋
 
 ---

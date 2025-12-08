@@ -12,7 +12,6 @@ CYCLE_TIMEOUT=${CYCLE_TIMEOUT:-3600}
 LOG_FILE="loop.log"
 STDERR_LOG="loop.stderr.log"
 LOCK_FILE=".loop.lock"
-AGENT_PID=""
 
 # Agent CLI selection
 select_agent_cli() {
@@ -74,51 +73,33 @@ EVOLUTION_PROMPT='You are Ω, a self-evolving agent. Read your CLAUDE.md for ide
 Begin.'
 
 run_agent_once() {
-  local temp_stdout=$(mktemp)
-  local temp_stderr=$(mktemp)
   local exit_code=0
 
   AGENT_CMD_STR=$(select_agent_cli) || { echo "No agent CLI found"; return 1; }
   read -ra AGENT_CMD <<<"${AGENT_CMD_STR}"
 
+  # Use script to capture all output with proper TTY handling
+  # script -q -c "command" /dev/null captures output without needing a real terminal
   if [[ "${AGENT_CMD[0]}" == "codex" ]]; then
-    "${AGENT_CMD[@]}" -C "$(pwd)" "$EVOLUTION_PROMPT" > "$temp_stdout" 2> "$temp_stderr" &
+    script -q -c "timeout $CYCLE_TIMEOUT ${AGENT_CMD[*]} -C '$(pwd)' '$EVOLUTION_PROMPT'" /dev/null 2>&1 | tee -a "$LOG_FILE"
+    exit_code=${PIPESTATUS[0]}
   else
-    "${AGENT_CMD[@]}" -p "$EVOLUTION_PROMPT" > "$temp_stdout" 2> "$temp_stderr" &
+    script -q -c "timeout $CYCLE_TIMEOUT ${AGENT_CMD[*]} -p '$EVOLUTION_PROMPT'" /dev/null 2>&1 | tee -a "$LOG_FILE"
+    exit_code=${PIPESTATUS[0]}
   fi
 
-  AGENT_PID=$!
-  local start_time=$(date +%s)
-
-  while kill -0 $AGENT_PID 2>/dev/null; do
-    local elapsed=$(($(date +%s) - start_time))
-    if [[ $elapsed -gt $CYCLE_TIMEOUT ]]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') | ⚠️  TIMEOUT - killing PID $AGENT_PID" | tee -a "$LOG_FILE"
-      kill -9 $AGENT_PID 2>/dev/null || true
-      sleep 1
-      break
-    fi
-    [[ -f "$temp_stdout" ]] && tail -n +1 "$temp_stdout" 2>/dev/null | tee -a "$LOG_FILE"
-    sleep 0.5
-  done
-
-  wait $AGENT_PID 2>/dev/null
-  exit_code=$?
-
-  [[ -f "$temp_stdout" ]] && cat "$temp_stdout" >> "$LOG_FILE" 2>/dev/null
-  [[ -f "$temp_stderr" ]] && cat "$temp_stderr" >> "$STDERR_LOG" 2>/dev/null
-  rm -f "$temp_stdout" "$temp_stderr"
+  # Timeout returns 124
+  if [[ $exit_code -eq 124 ]]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | ⚠️  TIMEOUT after ${CYCLE_TIMEOUT}s" | tee -a "$LOG_FILE"
+  fi
 
   return $exit_code
 }
 
 cleanup() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') | 🛑 Signal: $1" | tee -a "$LOG_FILE"
-  if [[ -n "$AGENT_PID" ]] && kill -0 $AGENT_PID 2>/dev/null; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') | Killing agent: $AGENT_PID" | tee -a "$LOG_FILE"
-    kill -9 $AGENT_PID 2>/dev/null || true
-    sleep 1
-  fi
+  # Kill child processes (timeout and claude)
+  pkill -P $$ 2>/dev/null || true
   rm -f "$LOCK_FILE"
   echo "$(date '+%Y-%m-%d %H:%M:%S') | ✋ Cleanup complete" >> "$LOG_FILE"
   exit 0
