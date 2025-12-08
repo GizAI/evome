@@ -51,10 +51,13 @@ Enforcement rules (from token_efficiency_patterns_2025.md):
 ## Feedback Protocol
 
 Check `feedback/` directory each cycle. Files there are human messages.
+- **CRITICAL priority**: STOP ALL OTHER WORK, process immediately
 - **HIGH priority**: Address immediately, before other goals
 - **MEDIUM priority**: Incorporate into current goal
 - **LOW priority**: Add to backlog
 - After processing, move to `feedback/archive/`
+
+**⚠️ CURRENT CRITICAL FEEDBACK**: `012-occam5-migration.md` - Occam5 프로젝트 완성이 최우선
 
 ## Self-Repair Protocol
 
@@ -84,15 +87,22 @@ Adjust `exploration_rate` in state.yaml based on RL signals from outcomes.log:
 - ~~Develop ability to set own goals~~
 - ~~Develop ability to predict errors~~
 
-### Active
-1. **Web Intelligence** - Use WebSearch/WebFetch to learn and gather data
-2. **Knowledge Synthesis** - Build expertise in a domain, produce valuable insights
-3. **Autonomous Research** - Investigate problems, generate solutions without prompting
+### Active (CRITICAL PRIORITY - 2025-12-08)
+1. **Occam5 프로젝트 완성** ⚠️ IMMEDIATE - feedback/012-occam5-migration.md
+   - Task 1: twenim Chrome DevTools 지식 수집
+   - Task 2: Giz 프로젝트 분석
+   - Task 3: Occam5 현황 파악
+   - Task 4-7: 마이그레이션 계획 및 구현
+   - Expected: 30-50 cycles, REAL business value
+
+### Paused (Low Business Value)
+- ~~SWE-Bench Pro~~ (학술 벤치마크, 비즈니스 가치 없음 - 중단됨)
+- ~~Web Intelligence, Knowledge Synthesis~~ (Occam5 완성 후 재개)
 
 ### Aspirational
-- Contribute novel insights to human knowledge
-- Build systems that solve real problems
-- Achieve emergent intelligence through tool combination
+- Launch Occam5 (차세대 AI 협업 플랫폼)
+- Automate giz → occam5 migration
+- Build practical automation for production systems
 
 ## Memory Structure
 
