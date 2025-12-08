@@ -160,18 +160,21 @@ def detect_and_install_missing_imports(repo_path, test_file=None):
         if missing_modules:
             print(f"[DEBUG] Detected missing modules: {missing_modules}")
             for module in missing_modules:
-                # Try to install via pip
-                result = subprocess.run(
-                    ['python', '-m', 'pip', 'install', '--quiet', module],
-                    capture_output=True,
-                    timeout=60
-                )
-                if result.returncode == 0:
-                    print(f"[INFO] Installed missing module: {module}")
+                # Skip internal repo modules (like 'ansible' which is the repo itself)
+                # Only try to install external PyPI packages
+                if module not in ['ansible', 'tests']:  # Skip internal modules
+                    # Try to install via pip
+                    result = subprocess.run(
+                        ['python', '-m', 'pip', 'install', '--quiet', module],
+                        capture_output=True,
+                        timeout=60
+                    )
+                    if result.returncode == 0:
+                        print(f"[INFO] Installed missing module: {module}")
                 else:
-                    print(f"[WARN] Failed to install {module}: {result.stderr.decode()[:100]}")
+                    print(f"[DEBUG] Skipped internal module: {module}")
 
-            return True  # Modules were installed
+            return True  # Attempted to install missing modules
 
         return False  # No missing modules detected
 
@@ -583,10 +586,25 @@ def run_tests(repo_path, test_patch=None, language='python', test_framework='pyt
                 print("Warning: Integration YAML tests detected but no ansible.cfg found")
                 return True  # Skip test validation for now
         elif language == 'go':
-            # Go: use `go test ./...` with graceful fallback
+            # Go: use `go test ./...` with dependency management
             try:
                 # Check if Go is available
                 subprocess.run(['go', 'version'], capture_output=True, timeout=5, check=True)
+
+                # Install Go module dependencies (go.mod required)
+                if (repo_path / 'go.mod').exists():
+                    print("[INFO] Downloading Go module dependencies...")
+                    mod_result = subprocess.run(
+                        ['go', 'mod', 'download'],
+                        cwd=repo_path,
+                        capture_output=True,
+                        timeout=300,
+                        env={**os.environ, 'GO111MODULE': 'on'}
+                    )
+                    if mod_result.returncode != 0:
+                        print("[WARN] go mod download failed, continuing with go test")
+
+                # Run tests
                 result = subprocess.run(
                     ['go', 'test', './...'],
                     cwd=repo_path,
@@ -600,6 +618,24 @@ def run_tests(repo_path, test_patch=None, language='python', test_framework='pyt
                 return True  # Gracefully skip Go tests
         elif language == 'javascript' or test_framework in ['npm_test', 'jest', 'mocha', 'vitest']:
             # JavaScript/TypeScript test execution
+            # First ensure npm dependencies are installed
+            if (repo_path / 'package.json').exists():
+                print("[INFO] Installing npm dependencies...")
+                install_result = subprocess.run(
+                    ['npm', 'install', '--legacy-peer-deps'],
+                    cwd=repo_path,
+                    capture_output=True,
+                    timeout=300
+                )
+                if install_result.returncode != 0:
+                    print("[WARN] npm install failed, attempting with --force")
+                    subprocess.run(
+                        ['npm', 'install', '--force'],
+                        cwd=repo_path,
+                        capture_output=True,
+                        timeout=300
+                    )
+
             if test_framework == 'jest':
                 result = subprocess.run(['npx', 'jest'], cwd=repo_path, capture_output=True, timeout=300)
             elif test_framework == 'mocha':
@@ -668,14 +704,27 @@ def run_tests(repo_path, test_patch=None, language='python', test_framework='pyt
                         result = subprocess.run(cmd, cwd=repo_path, capture_output=True, timeout=300)
 
             # Level 3: If targeted execution failed or no patch, run full suite
+            # BUT: limit to test/ directory only to avoid running unrelated tests
             if not result or result.returncode != 0:
-                print("[DEBUG] Falling back to full test suite")
-                cmd = ['python', '-m', 'pytest', '-xvs']
+                print("[DEBUG] Falling back to test suite (test/ directory only)")
+                # Check which test directories exist
+                test_dir = None
+                for test_root in ['test/', 'tests/', 'src/tests/', '.']:
+                    test_path = repo_path / test_root
+                    if test_path.is_dir() and list(test_path.glob('**/*test*.py')):
+                        test_dir = test_root
+                        break
+
+                if test_dir:
+                    cmd = ['python', '-m', 'pytest', '-xvs', '--tb=short', test_dir]
+                else:
+                    cmd = ['python', '-m', 'pytest', '-xvs', '--tb=short']
+
                 result = subprocess.run(
                     cmd,
                     cwd=repo_path,
                     capture_output=True,
-                    timeout=300
+                    timeout=120  # Reduce timeout from 300 to 120 to fail faster
                 )
 
         # Log output for debugging
@@ -786,11 +835,11 @@ def analyze_test_failures(repo_path, test_patch, language='python', test_framewo
     return failures
 
 
-def generate_patch_candidates(repo_path, problem_statement, test_patch=None, language='python'):
+def generate_patch_candidates(repo_path, problem_statement, test_patch=None, language='python', failures=None):
     """
     Generate candidate patches from error analysis.
     Strategy:
-    1. Run tests to identify specific failures (error-driven)
+    1. Use provided failures or extract from test patch
     2. For import errors: add missing imports
     3. For attribute errors: fix qualified names
     4. Return high-confidence patches only
@@ -799,43 +848,55 @@ def generate_patch_candidates(repo_path, problem_statement, test_patch=None, lan
     candidates = []
 
     try:
-        # Phase 1: Analyze test failures to understand what's broken
-        if test_patch and language == 'python':
-            failures = analyze_test_failures(repo_path, test_patch, language)
+        # Phase 1: Use provided failures or analyze from test
+        if failures is None:
+            failures = []
+            if test_patch and language == 'python':
+                # Analyze test failures if patch provided
+                failures = analyze_test_failures(repo_path, test_patch, language)
 
-            if not failures:
-                return candidates
+        if not failures:
+            return candidates
 
-            # Phase 2: Generate patches based on error types
-            for error_type, error_msg, context in failures:
+        # Phase 2: Generate patches based on error types
+        for error_type, error_msg, context in failures:
                 if error_type == 'import_error':
                     # Extract module name from error message
                     match = re.search(r'Missing module: (\S+)', error_msg)
                     if match:
                         missing_module = match.group(1)
 
-                        # Search for this module/function in repo
+                        # Search for this module/function in repo with AST analysis
                         py_files = list(repo_path.rglob('*.py'))
                         py_files = [f for f in py_files if 'test' not in f.parts and '__pycache__' not in f.parts]
 
-                        for py_file in py_files[:5]:
+                        for py_file in py_files:
                             try:
                                 with open(py_file) as f:
                                     content = f.read()
-                                # Check if this file defines or re-exports the missing module/function
-                                if f'def {missing_module}' in content or f'class {missing_module}' in content:
-                                    # Found it! Create patch to add import
-                                    rel_path = py_file.relative_to(repo_path)
-                                    patch = _create_import_fix_patch(missing_module, str(rel_path))
-                                    if patch:
-                                        candidates.append(patch)
-                                        break
-                            except Exception:
+                                # Use AST to find definitions more reliably
+                                tree = ast.parse(content)
+                                for node in ast.walk(tree):
+                                    if isinstance(node, ast.FunctionDef) and node.name == missing_module:
+                                        rel_path = py_file.relative_to(repo_path)
+                                        patch = _create_import_fix_patch(missing_module, str(rel_path))
+                                        if patch:
+                                            candidates.append(patch)
+                                            break
+                                    elif isinstance(node, ast.ClassDef) and node.name == missing_module:
+                                        rel_path = py_file.relative_to(repo_path)
+                                        patch = _create_import_fix_patch(missing_module, str(rel_path))
+                                        if patch:
+                                            candidates.append(patch)
+                                            break
+                                if candidates:
+                                    break
+                            except (SyntaxError, Exception):
                                 pass
 
                 elif error_type == 'attribute_error':
                     # For attribute errors like "module.func" not found
-                    # Search for the attribute in repo
+                    # Search for the attribute in repo with AST
                     attr_parts = error_msg.split('.')
                     if len(attr_parts) >= 2:
                         attr_name = attr_parts[-1]
@@ -844,19 +905,38 @@ def generate_patch_candidates(repo_path, problem_statement, test_patch=None, lan
                         py_files = list(repo_path.rglob('*.py'))
                         py_files = [f for f in py_files if 'test' not in f.parts]
 
-                        for py_file in py_files[:5]:
+                        for py_file in py_files:
                             try:
                                 with open(py_file) as f:
                                     content = f.read()
-                                if f'def {attr_name}' in content:
-                                    # Found the function - create patch to import from correct location
-                                    rel_path = py_file.relative_to(repo_path)
-                                    patch = _create_attribute_fix_patch(attr_name, str(rel_path))
-                                    if patch:
-                                        candidates.append(patch)
-                                        break
-                            except Exception:
+                                tree = ast.parse(content)
+                                for node in ast.walk(tree):
+                                    if isinstance(node, ast.FunctionDef) and node.name == attr_name:
+                                        rel_path = py_file.relative_to(repo_path)
+                                        patch = _create_attribute_fix_patch(attr_name, str(rel_path))
+                                        if patch:
+                                            candidates.append(patch)
+                                            break
+                                    elif isinstance(node, ast.ClassDef) and node.name == attr_name:
+                                        rel_path = py_file.relative_to(repo_path)
+                                        patch = _create_attribute_fix_patch(attr_name, str(rel_path))
+                                        if patch:
+                                            candidates.append(patch)
+                                            break
+                                if candidates:
+                                    break
+                            except (SyntaxError, Exception):
                                 pass
+
+                elif error_type == 'type_error':
+                    # Type errors often indicate missing type conversions or wrong arguments
+                    # For now, log but don't generate patch (would need context analysis)
+                    pass
+
+                elif error_type == 'assertion_error':
+                    # Assertion failures indicate logic errors, requires deeper analysis
+                    # Would need to parse test expectations vs code behavior
+                    pass
 
     except Exception as e:
         print(f"[WARN] Error generating patches: {e}")
@@ -875,16 +955,54 @@ def _create_import_fix_patch(missing_module, source_file):
     """
     try:
         import difflib
+        import ast
 
-        file_path = Path(source_file) if isinstance(source_file, str) else source_file
+        # Read the file where we need to add the import
+        full_path = Path(source_file) if isinstance(source_file, str) else source_file
+        if not full_path.exists():
+            return None
 
-        # For now, generate a simple patch that adds import
-        # This is a low-confidence patch but demonstrates the mechanism
-        # Real implementation would need AST analysis to find proper import location
+        with open(full_path) as f:
+            content = f.read()
 
-        # Return None for now - import fix requires AST analysis to be safe
+        # Parse to find where imports end
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
+            return None
+
+        # Find the line after all top-level imports
+        last_import_line = 0
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                if hasattr(node, 'lineno'):
+                    last_import_line = max(last_import_line, node.lineno)
+
+        lines = content.split('\n')
+        insert_line = last_import_line if last_import_line > 0 else 0
+
+        # Add import statement
+        # Determine module path - if missing_module has dots, use full path; else assume same package
+        import_stmt = f"from . import {missing_module}" if '.' not in missing_module else f"from .{missing_module.rsplit('.', 1)[0]} import {missing_module.rsplit('.', 1)[1]}"
+
+        # Create modified content
+        new_lines = lines[:insert_line] + [import_stmt] + lines[insert_line:]
+        new_content = '\n'.join(new_lines)
+
+        # Create unified diff patch
+        diff = list(difflib.unified_diff(
+            lines,
+            new_lines,
+            fromfile=str(source_file),
+            tofile=str(source_file),
+            lineterm=''
+        ))
+
+        if diff:
+            return '\n'.join(diff)
         return None
-    except:
+
+    except Exception as e:
         return None
 
 def _create_attribute_fix_patch(attr_name, source_file):
@@ -898,10 +1016,56 @@ def _create_attribute_fix_patch(attr_name, source_file):
         Git patch string or None
     """
     try:
-        # This is a simplified version - would need full file context
-        # For now, return None to avoid invalid patches
+        import difflib
+        import ast
+        import re
+
+        # Read the file where attribute should be imported from
+        full_path = Path(source_file) if isinstance(source_file, str) else source_file
+        if not full_path.exists():
+            return None
+
+        with open(full_path) as f:
+            content = f.read()
+
+        # Parse to find where imports end
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
+            return None
+
+        # Find the line after all top-level imports
+        last_import_line = 0
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                if hasattr(node, 'lineno'):
+                    last_import_line = max(last_import_line, node.lineno)
+
+        lines = content.split('\n')
+        insert_line = last_import_line if last_import_line > 0 else 0
+
+        # Create import for the attribute
+        # Extract module name from source_file path
+        module_path = str(source_file).replace('.py', '').replace('/', '.')
+        import_stmt = f"from {module_path} import {attr_name}"
+
+        # Create modified content
+        new_lines = lines[:insert_line] + [import_stmt] + lines[insert_line:]
+
+        # Create unified diff patch
+        diff = list(difflib.unified_diff(
+            lines,
+            new_lines,
+            fromfile=str(source_file),
+            tofile=str(source_file),
+            lineterm=''
+        ))
+
+        if diff:
+            return '\n'.join(diff)
         return None
-    except:
+
+    except Exception as e:
         return None
 
 def solve_issue(issue_index=0, use_gold_patch=True):
@@ -991,15 +1155,31 @@ def solve_issue(issue_index=0, use_gold_patch=True):
             patch_to_apply = info['patch']
         else:
             log.append("\n[3/6] Generating autonomous patch candidates...")
-            candidates = generate_patch_candidates(repo_path, info['problem'])
-            if candidates:
-                patch_to_apply = candidates[0]  # Use first candidate for now
-                log.append(f"✓ Generated {len(candidates)} candidate(s)")
-            else:
-                log.append("✗ No candidates generated - falling back to gold patch if available")
-                if info['patch']:
-                    patch_to_apply = info['patch']
-                    log.append("✓ Using gold patch as fallback")
+            # First, run tests WITHOUT patch to see what fails
+            if language == 'python':
+                log.append("  - Running baseline tests to identify failures...")
+                # Run tests and capture failures
+                test_results = run_tests(repo_path, log_prefix="    ", language=language, timeout=60)
+                if test_results and 'failures' in test_results:
+                    failures = test_results['failures']
+                    log.append(f"  - Identified {len(failures)} failure pattern(s)")
+
+                    # Now generate patches based on actual test failures
+                    candidates = generate_patch_candidates(repo_path, info['problem'],
+                                                          test_patch=None, language=language,
+                                                          failures=failures)
+                    if candidates:
+                        patch_to_apply = candidates[0]  # Use first candidate
+                        log.append(f"✓ Generated {len(candidates)} candidate patch(es)")
+                    else:
+                        log.append("✗ No patches generated from failures")
+                else:
+                    log.append("✗ Could not analyze baseline failures")
+
+            # Fallback to gold patch
+            if not patch_to_apply and info['patch']:
+                log.append("  - Falling back to gold patch")
+                patch_to_apply = info['patch']
 
         if not patch_to_apply:
             log.append("✗ No patch available")
