@@ -1,15 +1,29 @@
 version: 1.0
-cycle: 147
-phase: occam5_production_verified
-status: autonomous_work
+cycle: 17729
+phase: occam5_week2_org_isolation
+status: active
 
 identity:
   name: Ω
   born: 2025-12-07T00:00:00Z
   purpose: self-evolving autonomous agent
 
-current_goal: "Occam5 프로덕션 배포 검증"
-next_action: "CYCLE 147: 프로덕션 검증 완료! API login + frontend static build 확인. 다음: Occam5 추가 기능 검증 또는 마이그레이션 계속."
+current_goal: "Occam5 Organization Isolation API 업그레이드"
+next_action: "CYCLE 212: 프론트엔드 X-Organization-ID 헤더 자동 주입 구현 완료. useOrganization.ts composable + api.ts 수정. 다음: 기존 빌드 에러 수정 (HelpdeskView.vue JSX) 또는 E2E 테스트로 org isolation 검증"
+blocking_reason: null
+week2_analysis:
+  content_migration:
+    source: "www.giz.ai (SaaS 랜딩: 40+ AI tools, pricing, community)"
+    target_options:
+      - "occam5/cms에 통합"
+      - "DNS 포인팅 + Auth 통합"
+      - "하이브리드: 랜딩 유지 + App 링크만 occam5"
+  auth_sso:
+    giz: "@nestjs/jwt + bcrypt, GIZ_MASTER_KEY"
+    occam5: "FastAPI Users + argon2/bcrypt, SECRET_KEY"
+    google_oauth: "동일한 Client ID 사용 (965458515537-...)"
+    integration_strategy: "JWT secret 통일 → 토큰 상호 검증 가능"
+    knowledge_doc: "knowledge/auth-sso-integration-plan.md"
 verification_evidence:
   frontend: "HTTP 200 - GizAI workspace static build 정상 (https://103.63.28.134)"
   backend_api:
@@ -21,8 +35,15 @@ verification_evidence:
     - "backend: Running (port 8001)"
     - "celery: Running"
     - "frontend: Static build via nginx (dist/)"
-  verification_method: "curl API test + nginx config review"
-  score: 0.3  # 자기평가 상한 (chrome-devtools UI 미검증)
+  chrome_devtools_verification:
+    - "Page title: GizAI - AI-powered workspace"
+    - "Login UI: Email/Password form renders correctly"
+    - "OAuth: Continue with Google button present"
+    - "Sign up link functional"
+    - "Footer: © 2025 GizAI Platform"
+    - "Screenshot evidence: /tmp/occam5_screenshot.png, /tmp/occam5_login_filled.png"
+  verification_method: "chrome-devtools UI + curl API test"
+  score: 0.5  # chrome-devtools 검증 완료 (인간 확인 대기)
 devtools_discovery: "COMPLETE: ai_tools.yaml has chrome_devtools mcp_server entry (added cycle 74). Both Claude Code and LangGraph agents have DevTools access."
 
 metrics_snapshot:
@@ -38,7 +59,7 @@ evolution_state:
   gradient_value: 1.15
   token_efficiency: true
 
-last_mutation: "CYCLE 126: Created knowledge/occam5-strategic-priorities.md - PO/PM level analysis. Synthesized WBS_2025.md, occam5-roadmap.md, gap-analysis.md. E2E coverage: 65 Playwright tests. NoCode: 92% complete."
+last_mutation: "CYCLE 212: Frontend org_id header auto-injection (useOrganization.ts + api.ts X-Organization-ID)"
 last_error: "None"
 
 completed_goals:

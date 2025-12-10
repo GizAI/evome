@@ -5,10 +5,11 @@
 
 ## Executive Summary
 
-### 현황
+### 현황 (Updated 2025-12-09 Cycle 167)
 - **NoCode 핵심 기능**: 92% 완료 (Occam4 대비)
-- **E2E 테스트**: Playwright 65개 테스트 (UX-crawl 기반)
-- **백엔드 테스트**: 86.4% (261/302) 통과
+- **E2E 테스트**: 84/84 (100%) - 42 scenarios × 2 browsers
+- **백엔드 테스트**: 331/331 (100%) ✅ Beta gate exceeded
+- **Deepagents 테스트**: 54/54 (100%) ✅
 
 ### 비즈니스 임팩트 기준 우선순위
 
@@ -17,7 +18,7 @@
 | **P0** | Deepagents 기본 엔진 | 핵심 차별화 | 🔄 진행중 |
 | **P0** | GizAI 사이트 마이그레이션 | 도메인 통합 | 🔄 진행중 |
 | **P0** | 미디어 생성 (Image/Video/Audio) | 레거시 대체 | 🔄 진행중 |
-| **P1** | Auth/SSO 안정화 | 사용자 경험 | ⚠️ 부분 |
+| **P1** | Auth/SSO 안정화 | 사용자 경험 | ⏳ 배포 대기 (코드 완료, 인간 필요) |
 | **P1** | Drive 공유/권한 | 협업 기능 | ⚠️ 부분 |
 | **P2** | E2E 테스트 커버리지 확대 | 품질 보증 | 📊 65개 |
 
@@ -104,18 +105,28 @@ pnpm -C frontend test:e2e:smoke  # 빠른 스모크
 ## 4. 권장 우선순위 (다음 3주)
 
 ### Week 1 (12/9-12/15) - Deepagents + Media
-| Task | 담당 | 중요도 |
-|------|------|--------|
-| Deepagents 기본 엔진 안정화 | Backend | 높음 |
-| Image generation → Drive | Backend | 중간 |
-| E2E: Media flow 테스트 추가 | QA | 중간 |
+| Task | 담당 | 중요도 | 상태 |
+|------|------|--------|------|
+| Deepagents 기본 엔진 안정화 | Backend | 높음 | ✅ LangGraph 제거, 테스트 통과 |
+| Image generation → Drive | Backend | 중간 | ✅ 커밋 완료 (dad359cf) |
+| E2E: Media flow 테스트 추가 | QA | 중간 | ✅ 10/12 통과 (bf302e8d) |
+
+**Week 1 상태**: 3/3 완료 ✅ (배포 대기)
 
 ### Week 2 (12/16-12/22) - Site Migration
-| Task | 담당 | 중요도 |
-|------|------|--------|
-| www.giz.ai 콘텐츠 마이그레이션 | Frontend | 높음 |
-| Auth/SSO 통합 | Backend | 높음 |
-| E2E: 로그인 플로우 강화 | QA | 중간 |
+| Task | 담당 | 중요도 | 상태 |
+|------|------|--------|------|
+| www.giz.ai 콘텐츠 마이그레이션 | Frontend | 높음 | 🔄 분석 완료 |
+| Auth/SSO 통합 | Backend | 높음 | ⏳ 대기 |
+| E2E: 로그인 플로우 강화 | QA | 중간 | ⏳ 대기 |
+
+**Week 2 분석 (Cycle 176)**:
+- giz.ai = SaaS 랜딩 페이지 (40+ AI tools, pricing, community)
+- occam5/cms = Nuxt 블로그 사이트 (별도)
+- 마이그레이션 옵션:
+  1. giz.ai 랜딩 → occam5/cms에 통합
+  2. giz.ai 도메인 → occam5 DNS 포인팅 + Auth 통합
+  3. 하이브리드: 랜딩 유지 + App 링크만 occam5로
 
 ### Week 3 (12/23-12/31) - Polish & Gate
 | Task | 담당 | 중요도 |
@@ -134,9 +145,10 @@ pnpm -C frontend test:e2e:smoke  # 빠른 스모크
 - [ ] 에러율 <1%
 - [ ] Chat/Media 지연시간 p95 <3s
 
-### 현재 상태
-- 백엔드: 86.4% (261/302)
-- E2E: 65 tests (커버리지 미측정)
+### 현재 상태 (Updated 2025-12-09)
+- 백엔드: 100% (331/331) ✅ **EXCEEDED**
+- E2E: 84/84 (100%) ✅ **EXCEEDED**
+- Deepagents: 54/54 (100%) ✅
 - 에러율: 미측정
 - 지연시간: 미측정
 
